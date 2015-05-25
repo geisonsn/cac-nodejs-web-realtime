@@ -5,7 +5,9 @@ var express = require("express"),
 	expressSession = require("express-session"),
 	methodOverride = require("method-override"),
 	error = require("./middlewares/error"),
-	app = express();
+	app = express(),
+	server = require("http").Server(app),
+	io = require("socket.io")(server);
 
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");
@@ -21,9 +23,20 @@ load("models")
 	.then("routes")
 	.into(app);
 
+load("sockets")
+    .into(io);
+
+/*io.sockets.on("connection", function(client) {
+	client.on("send-server", function(data) {
+		var msg = "<b>" + data.nome + ":</b>" + data.msg + "<br>";
+		client.emit("send-client", msg);
+		client.broadcast.emit("send-client", msg);
+	});
+});*/
+
 app.use(error.notFound);
 app.use(error.serverError);
 
-app.listen(3000, function() {
+server.listen(3000, function() {
 	console.log("Ntalk no ar.");
 });
